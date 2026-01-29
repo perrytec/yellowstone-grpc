@@ -14,6 +14,7 @@ use {
         collections::HashMap,
         env,
         fs::File,
+        io::Write as _,
         path::PathBuf,
         str::FromStr,
         sync::Arc,
@@ -697,6 +698,44 @@ async fn geyser_health_watch(mut client: GeyserGrpcClient<impl Interceptor>) -> 
     Ok(())
 }
 
+struct CsvBatcher {
+    rows: Vec<String>,
+    path: PathBuf,
+    batch_size: usize,
+}
+
+impl CsvBatcher {
+    fn new(path: PathBuf, batch_size: usize) -> std::io::Result<Self> {
+        if !path.exists() {
+            std::fs::write(&path, "slot,signature,timestamp_us\n")?;
+        }
+        Ok(Self {
+            rows: Vec::with_capacity(batch_size),
+            path,
+            batch_size,
+        })
+    }
+
+    fn push(&mut self, slot: u64, signature: &str, timestamp_us: u128) -> std::io::Result<()> {
+        self.rows.push(format!("{slot},{signature},{timestamp_us}"));
+        if self.rows.len() >= self.batch_size {
+            self.flush()?;
+        }
+        Ok(())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        if self.rows.is_empty() {
+            return Ok(());
+        }
+        let mut file = std::fs::OpenOptions::new().append(true).open(&self.path)?;
+        for row in self.rows.drain(..) {
+            writeln!(file, "{row}")?;
+        }
+        Ok(())
+    }
+}
+
 async fn geyser_subscribe(
     mut client: GeyserGrpcClient<impl Interceptor>,
     request: SubscribeRequest,
@@ -729,6 +768,11 @@ async fn geyser_subscribe(
     let (mut subscribe_tx, mut stream) = client.subscribe_with_request(Some(request)).await?;
 
     info!("stream opened");
+    let csv_filename = {
+        let now = chrono::Local::now();
+        format!("tx_status_{}.csv", now.format("%Y-%m-%d_%H-%M-%S"))
+    };
+    let mut csv_batcher = CsvBatcher::new(csv_filename.into(), 500)?;
     let mut counter = 0;
     while let Some(message) = stream.next().await {
         match message {
@@ -843,20 +887,14 @@ async fn geyser_subscribe(
                         print_update("transaction", created_at, &filters, value);
                     }
                     Some(UpdateOneof::TransactionStatus(msg)) => {
-                        print_update(
-                            "transactionStatus",
-                            created_at,
-                            &filters,
-                            json!({
-                                "slot": msg.slot,
-                                "signature": Signature::try_from(msg.signature.as_slice()).context("invalid signature")?.to_string(),
-                                "isVote": msg.is_vote,
-                                "index": msg.index,
-                                "err": convert_from::create_tx_error(msg.err.as_ref())
-                                    .map_err(|error| anyhow::anyhow!(error))
-                                    .context("invalid error")?,
-                            }),
-                        );
+                        let sig = Signature::try_from(msg.signature.as_slice())
+                            .context("invalid signature")?
+                            .to_string();
+                        let ts = created_at
+                            .duration_since(UNIX_EPOCH)
+                            .expect("valid system time")
+                            .as_micros();
+                        csv_batcher.push(msg.slot, &sig, ts)?;
                     }
                     Some(UpdateOneof::Entry(msg)) => {
                         print_update("entry", created_at, &filters, create_pretty_entry(msg)?);
@@ -956,6 +994,7 @@ async fn geyser_subscribe(
                 .map_err(GeyserGrpcClientError::SubscribeSendError)?;
         }
     }
+    csv_batcher.flush()?;
     info!("stream closed");
     Ok(())
 }
