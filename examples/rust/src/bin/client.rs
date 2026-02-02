@@ -772,7 +772,7 @@ async fn geyser_subscribe(
         let now = chrono::Local::now();
         format!("output/tx_status_{}.csv", now.format("%Y-%m-%d_%H-%M-%S"))
     };
-    let mut csv_batcher = CsvBatcher::new(csv_filename.into(), 500)?;
+    let mut csv_batcher = CsvBatcher::new(csv_filename.into(), 50)?;
     let mut counter = 0;
     while let Some(message) = stream.next().await {
         match message {
@@ -893,7 +893,7 @@ async fn geyser_subscribe(
                             .expect("valid system time")
                             .as_micros();
                         csv_batcher.push(msg.slot, &sig, ts)?;
-//                         print_update("transaction", created_at, &filters, value);
+                        print_update("transaction", created_at, &filters, value);
                     }
                     Some(UpdateOneof::TransactionStatus(msg)) => {
                         let sig = Signature::try_from(msg.signature.as_slice())
