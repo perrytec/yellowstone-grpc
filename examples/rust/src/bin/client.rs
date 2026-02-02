@@ -884,15 +884,16 @@ async fn geyser_subscribe(
                             .ok_or(anyhow::anyhow!("no transaction in the message"))?;
                         let mut value = create_pretty_transaction(tx)?;
                         value["slot"] = json!(msg.slot);
-                        let sig = Signature::try_from(msg.signature.as_slice())
-                            .context("invalid signature")?
+                        let sig = value["signature"]
+                            .as_str()
+                            .ok_or(anyhow::anyhow!("missing signature in transaction"))?
                             .to_string();
                         let ts = created_at
                             .duration_since(UNIX_EPOCH)
                             .expect("valid system time")
                             .as_micros();
                         csv_batcher.push(msg.slot, &sig, ts)?;
-                        print_update("transaction", created_at, &filters, value);
+//                         print_update("transaction", created_at, &filters, value);
                     }
                     Some(UpdateOneof::TransactionStatus(msg)) => {
                         let sig = Signature::try_from(msg.signature.as_slice())

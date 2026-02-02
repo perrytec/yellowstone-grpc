@@ -1,0 +1,19 @@
+services:
+  yellowstone:
+    image: yellowstone:latest
+    environment:
+      ENDPOINT: "https://yellowstone-solana-mainnet.core.chainstack.com"
+      X_TOKEN: "51bd6e348ae5e28d55a8d6374c1e4645"
+      TRANSACTIONS_VOTE: "false"
+      TRANSACTIONS_FAILED: "false"
+      ACCOUNTS: >-
+        whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc,
+        Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE,
+        EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v,
+        So11111111111111111111111111111111111111112
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
