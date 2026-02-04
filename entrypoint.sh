@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-FULL_CMD="client --endpoint $ENDPOINT --x-token $X_TOKEN subscribe --transactions --transactions-vote $TRANSACTIONS_VOTE --transactions-failed $TRANSACTIONS_FAILED"
+FULL_CMD="client --endpoint $ENDPOINT --x-token $X_TOKEN subscribe --transactions --transactions-vote $TRANSACTIONS_VOTE"
 
 if [ -n "$ACCOUNTS" ]; then
   for acct in $(echo "$ACCOUNTS" | tr ',' ' '); do

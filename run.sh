@@ -6,11 +6,12 @@ cargo run --bin client -- \
   subscribe \
   --transactions \
   --transactions-vote false \
+  --transactions-account-include whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc \
   # --transactions-failed false \
-  --transactions-account-required whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc \
-  --transactions-account-required Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE \
-  --transactions-account-required EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --transactions-account-required So11111111111111111111111111111111111111112\
+  # --transactions-account-required whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc \
+  # --transactions-account-include Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE \
+  # --transactions-account-required EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  # --transactions-account-required So11111111111111111111111111111111111111112\
 
 #  Build succeeded. The image is ready as yellowstone_grpc_perry-client. You can run it with:
 #

@@ -7,10 +7,7 @@ services:
       TRANSACTIONS_VOTE: "false"
       TRANSACTIONS_FAILED: "false"
       ACCOUNTS: >-
-        whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc,
-        Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE,
-        EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v,
-        So11111111111111111111111111111111111111112
+        whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc
     restart: unless-stopped
     logging:
       driver: "json-file"
