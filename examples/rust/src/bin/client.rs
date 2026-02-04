@@ -884,16 +884,40 @@ async fn geyser_subscribe(
                             .ok_or(anyhow::anyhow!("no transaction in the message"))?;
                         let mut value = create_pretty_transaction(tx)?;
                         value["slot"] = json!(msg.slot);
+                        // println!("value -> {:?}", value);
                         let sig = value["signature"]
                             .as_str()
                             .ok_or(anyhow::anyhow!("missing signature in transaction"))?
                             .to_string();
+
+                        let target_owners = vec!["Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE"];
+
+                        let has_matching_owner = value
+                            .get("tx")
+                            .and_then(|tx| tx.get("meta"))
+                            .and_then(|meta| meta.get("postTokenBalances"))
+                            .and_then(|balances| balances.as_array())
+                            .map(|balances| {
+                                balances.iter()
+                                    .filter_map(|balance| balance.get("owner"))
+                                    .filter_map(|owner| owner.as_str())
+                                    .any(|owner| target_owners.contains(&owner))
+                            })
+                            .unwrap_or(false);
+
+                        if !has_matching_owner {
+                            continue;
+                        }
+                        // if has_matching_owner {
+                        //     println!("Found matching owner!");
+                        // }
+
                         let ts = created_at
                             .duration_since(UNIX_EPOCH)
                             .expect("valid system time")
                             .as_micros();
                         csv_batcher.push(msg.slot, &sig, ts)?;
-                        print_update("transaction", created_at, &filters, value);
+                        // print_update("transaction", created_at, &filters, value);
                     }
                     Some(UpdateOneof::TransactionStatus(msg)) => {
                         let sig = Signature::try_from(msg.signature.as_slice())
