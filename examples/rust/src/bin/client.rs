@@ -888,7 +888,6 @@ async fn geyser_subscribe(
                             .as_str()
                             .ok_or(anyhow::anyhow!("missing signature in transaction"))?
                             .to_string();
-                        println!("sig -> {:?}", sig);
                         let ts = created_at
                             .duration_since(UNIX_EPOCH)
                             .expect("valid system time")
