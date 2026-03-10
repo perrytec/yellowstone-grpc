@@ -1,12 +1,12 @@
 #!/bin/bash
 
 cargo run --bin client -- \
-  --endpoint "https://yellowstone-solana-mainnet.core.chainstack.com" \
-  --x-token "51bd6e348ae5e28d55a8d6374c1e4645" \
+  --endpoint  "https://perryte-mainnet-1de7.mainnet.rpcpool.com" \
+  --x-token  "23bc9873-7e47-4255-a60c-c7a802cb91e7" \
   subscribe \
   --transactions \
   --transactions-vote false \
-  --transactions-account-include whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc \
+  --transactions-account-include Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE  \
   # --transactions-failed false \
   # --transactions-account-required whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc \
   # --transactions-account-include Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE \
