@@ -889,8 +889,13 @@ async fn geyser_subscribe(
                             .as_str()
                             .ok_or(anyhow::anyhow!("missing signature in transaction"))?
                             .to_string();
-
-                        let target_owners = vec!["Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE"];
+                        println!("sig -> {:?}", sig);
+                        let target_owners: Vec<String> = env::var("TARGET_OWNERS")
+                            .unwrap_or_default()
+                            .split(',')
+                            .map(|s| s.trim().to_string())
+                            .filter(|s| !s.is_empty())
+                            .collect();
 
                         let has_matching_owner = value
                             .get("tx")
@@ -901,7 +906,7 @@ async fn geyser_subscribe(
                                 balances.iter()
                                     .filter_map(|balance| balance.get("owner"))
                                     .filter_map(|owner| owner.as_str())
-                                    .any(|owner| target_owners.contains(&owner))
+                                    .any(|owner| target_owners.iter().any(|t| t == owner))
                             })
                             .unwrap_or(false);
 
